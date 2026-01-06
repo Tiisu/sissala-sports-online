@@ -1,58 +1,105 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { matchesApi } from '@/lib/api';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [liveMatches, setLiveMatches] = useState<any[]>([]);
 
   const navigation = [
     { name: 'LIVE', href: '/matches?live=true' },
     { name: 'COMPETITIONS', href: '/tables' },
     { name: 'MATCHES', href: '/matches' },
     { name: 'TEAMS', href: '/teams' },
-    { name: 'PLAYERS', href: '/players' },
     { name: 'NEWS', href: '/news' },
   ];
 
-  // Mock live matches - will be replaced with real data
-  const liveMatches = [
-    { homeTeam: 'Anzhi Arsenal', awayTeam: 'Tula II', homeScore: 0, awayScore: 2, league: 'Youth Premier Liga \'89', time: '22:00 5th January, 2018' },
-    { homeTeam: 'Orenburg', awayTeam: 'Ural', homeScore: 0, awayScore: 1, league: 'Premier Liga \'70', time: '22:00 5th January, 2018' },
-    { homeTeam: 'Sangju Sanmu', awayTeam: 'Seongnam FC', homeScore: 1, awayScore: 3, league: 'K League', time: '22:00 5th January, 2018' },
-    { homeTeam: 'Perth Glory', awayTeam: 'Adelaide United', homeScore: 0, awayScore: 3, league: 'A League', time: '22:00 5th January, 2018' },
-  ];
+  // Fetch live and recent matches for the ticker
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        // Try to get live matches first
+        const liveResponse = await matchesApi.getLive();
+        const liveMatchesData = liveResponse.data.data.matches || [];
+        
+        // If no live matches, get recent finished matches
+        if (liveMatchesData.length === 0) {
+          const recentResponse = await matchesApi.getRecent();
+          const recentMatchesData = recentResponse.data.data.matches || [];
+          setLiveMatches(recentMatchesData.slice(0, 5)); // Show up to 5 recent matches
+        } else {
+          setLiveMatches(liveMatchesData);
+        }
+      } catch (error) {
+        console.error('Error fetching matches for ticker:', error);
+        setLiveMatches([]);
+      }
+    };
+
+    fetchMatches();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchMatches, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-[#1a2c4e] text-white shadow-lg">
       {/* Live Match Ticker - Scrolling Marquee */}
-      <div className="bg-white border-b border-gray-200 overflow-hidden">
-        <div className="relative">
-          <div className="flex animate-scroll-left py-3">
-            {/* Duplicate matches for seamless loop */}
-            {[...liveMatches, ...liveMatches].map((match, index) => (
-              <div key={index} className="flex items-center gap-3 min-w-[320px] px-4 border-r border-gray-200 flex-shrink-0">
-                <div className="text-xs text-gray-500 min-w-[100px] font-semibold">{match.league}</div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs">🛡️</div>
-                    <span className="text-sm font-medium text-gray-800 whitespace-nowrap">{match.homeTeam}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-2 py-1 bg-red-500 text-white rounded text-sm font-bold min-w-[50px] justify-center">
-                    {match.homeScore} - {match.awayScore}
+      {liveMatches.length > 0 && (
+        <div className="bg-white border-b border-gray-200 overflow-hidden">
+          <div className="relative">
+            <div className="flex animate-scroll-left py-3">
+              {/* Duplicate matches for seamless loop */}
+              {[...liveMatches, ...liveMatches].map((match, index) => (
+                <div key={index} className="flex items-center gap-3 min-w-[320px] px-4 border-r border-gray-200 flex-shrink-0">
+                  <div className="text-xs text-gray-500 min-w-[100px] font-semibold">
+                    {match.league?.name || match.season?.name || 'Match'}
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs">⚔️</div>
-                    <span className="text-sm font-medium text-gray-800 whitespace-nowrap">{match.awayTeam}</span>
+                    <div className="flex items-center gap-2">
+                      {match.homeTeam?.logo ? (
+                        <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-6 h-6 object-contain rounded-full" />
+                      ) : (
+                        <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs">🛡️</div>
+                      )}
+                      <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                        {match.homeTeam?.name}
+                      </span>
+                    </div>
+                    <div className={`flex items-center gap-2 px-2 py-1 rounded text-sm font-bold min-w-[50px] justify-center ${
+                      match.status === 'live' || match.status === 'halftime' ? 'bg-red-500' : 'bg-green-600'
+                    } text-white`}>
+                      {match.score?.home || 0} - {match.score?.away || 0}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {match.awayTeam?.logo ? (
+                        <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-6 h-6 object-contain rounded-full" />
+                      ) : (
+                        <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs">⚔️</div>
+                      )}
+                      <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                        {match.awayTeam?.name}
+                      </span>
+                    </div>
                   </div>
+                  {/* Status indicator */}
+                  {match.status === 'live' && (
+                    <span className="text-xs text-red-500 font-bold">LIVE</span>
+                  )}
+                  {match.status === 'finished' && (
+                    <span className="text-xs text-green-600 font-bold">FT</span>
+                  )}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
