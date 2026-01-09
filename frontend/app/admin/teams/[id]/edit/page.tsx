@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save } from 'lucide-react';
 import { teamsApi, seasonsApi, venuesApi, leaguesApi } from '@/lib/api';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function EditTeamPage() {
   const router = useRouter();
@@ -33,8 +34,8 @@ export default function EditTeamPage() {
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [teamPhotoFile, setTeamPhotoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>('');
-  const [teamPhotoPreview, setTeamPhotoPreview] = useState<string>('');
+  const [currentLogo, setCurrentLogo] = useState<string>('');
+  const [currentTeamPhoto, setCurrentTeamPhoto] = useState<string>('');
   const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
@@ -86,6 +87,10 @@ export default function EditTeamPage() {
         phone: team.contactInfo?.phone || team.phone || '',
       });
       
+      // Set current images for preview
+      setCurrentLogo(team.logo || '');
+      setCurrentTeamPhoto(team.stadium || '');
+      
       setSeasons(seasonsRes.data.data || []);
       setVenues(venuesRes.data.data || []);
       setLeagues(leaguesRes.data.data || []);
@@ -112,27 +117,17 @@ export default function EditTeamPage() {
     setFormData(prev => ({ ...prev, colors: newColors }));
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleLogoChange = (file: File | null) => {
+    setLogoFile(file);
+    if (errors.logo) {
+      setErrors((prev: any) => ({ ...prev, logo: '' }));
     }
   };
 
-  const handleTeamPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setTeamPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTeamPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleTeamPhotoChange = (file: File | null) => {
+    setTeamPhotoFile(file);
+    if (errors.stadium) {
+      setErrors((prev: any) => ({ ...prev, stadium: '' }));
     }
   };
 
@@ -435,53 +430,21 @@ export default function EditTeamPage() {
               <h3 className="font-bold text-lg text-text-primary mb-4">Media</h3>
               
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Team Logo
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="w-full px-4 py-3 rounded-lg border border-text-tertiary focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none"
-                  />
-                  {(logoPreview || formData.logo) && (
-                    <div className="mt-2">
-                      <img 
-                        src={logoPreview || formData.logo} 
-                        alt="Team logo preview" 
-                        className="w-24 h-24 object-contain border rounded" 
-                      />
-                    </div>
-                  )}
-                  <p className="text-sm text-text-secondary mt-1">
-                    Upload new logo or keep existing
-                  </p>
-                </div>
+                <ImageUpload
+                  label="Team Logo"
+                  currentImage={currentLogo}
+                  onImageChange={handleLogoChange}
+                  error={errors.logo}
+                  maxSize={5}
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Team Photo (First Eleven)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleTeamPhotoChange}
-                    className="w-full px-4 py-3 rounded-lg border border-text-tertiary focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none"
-                  />
-                  {teamPhotoPreview && (
-                    <div className="mt-2">
-                      <img 
-                        src={teamPhotoPreview} 
-                        alt="Team photo preview" 
-                        className="w-full max-w-md h-48 object-cover border rounded" 
-                      />
-                    </div>
-                  )}
-                  <p className="text-sm text-text-secondary mt-1">
-                    Upload team photo or squad picture
-                  </p>
-                </div>
+                <ImageUpload
+                  label="Team Photo (First Eleven)"
+                  currentImage={currentTeamPhoto}
+                  onImageChange={handleTeamPhotoChange}
+                  error={errors.stadium}
+                  maxSize={10}
+                />
               </div>
             </div>
 

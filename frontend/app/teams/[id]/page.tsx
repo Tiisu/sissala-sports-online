@@ -24,9 +24,7 @@ export default function TeamDetailPage() {
         
         // Fetch team details
         const teamResponse = await teamsApi.getById(teamId);
-        console.log('Team API Response:', teamResponse.data);
         const teamData = teamResponse.data.data?.team || teamResponse.data.data || teamResponse.data.team || null;
-        console.log('Extracted team:', teamData);
         setTeam(teamData);
         
         // Fetch team stats from current season standings
@@ -41,7 +39,6 @@ export default function TeamDetailPage() {
             const teamStanding = standings.find((s: any) => s.team?._id === teamId);
             
             if (teamStanding) {
-              console.log('Team stats from standings:', teamStanding);
               setTeamStats(teamStanding);
             }
           }
@@ -52,9 +49,7 @@ export default function TeamDetailPage() {
         // Fetch squad
         try {
           const squadResponse = await teamsApi.getSquad(teamId);
-          console.log('Squad API Response:', squadResponse.data);
           const squadData = squadResponse.data.data?.squad || squadResponse.data.data?.players || squadResponse.data.squad || squadResponse.data.players || squadResponse.data.data || [];
-          console.log('Extracted squad:', squadData, 'Is array:', Array.isArray(squadData));
           setSquad(Array.isArray(squadData) ? squadData : []);
         } catch (error) {
           console.error('Error fetching squad:', error);
@@ -343,27 +338,33 @@ export default function TeamDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {squadArray.map((player) => (
               <div
-                key={player.id}
+                key={player._id || player.id}
                 className="group"
               >
                 <div className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-lg transition-all cursor-default">
                   {/* Player Image */}
                   <div className="relative aspect-square bg-gradient-to-br from-[#1a2c4e] to-[#2a4a7c]">
-                    <img
-                      src={player.image}
-                      alt={player.name}
-                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-300"
-                    />
+                    {player.photo ? (
+                      <img
+                        src={player.photo}
+                        alt={`${player.firstName} ${player.lastName}`}
+                        className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-6xl">👤</span>
+                      </div>
+                    )}
                     {/* Jersey Number */}
                     <div className="absolute top-3 left-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-lg font-bold text-gray-900">#{player.number}</span>
+                      <span className="text-lg font-bold text-gray-900">#{player.jerseyNumber || player.number || '?'}</span>
                     </div>
                   </div>
 
                   {/* Player Info */}
                   <div className="p-4">
                     <h3 className="font-bold text-gray-900 group-hover:text-red-500 transition-colors mb-1">
-                      {player.name}
+                      {player.firstName} {player.lastName}
                     </h3>
                     <p className="text-sm text-gray-600">{player.position}</p>
                   </div>

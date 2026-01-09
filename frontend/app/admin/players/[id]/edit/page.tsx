@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save } from 'lucide-react';
 import { playersApi, teamsApi } from '@/lib/api';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function EditPlayerPage() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function EditPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [currentPhoto, setCurrentPhoto] = useState<string>('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -25,7 +28,6 @@ export default function EditPlayerPage() {
     height: '',
     weight: '',
     preferredFoot: 'Right',
-    photo: '',
   });
   const [errors, setErrors] = useState<any>({});
 
@@ -86,8 +88,10 @@ export default function EditPlayerPage() {
         height: player.height?.toString() || '',
         weight: player.weight?.toString() || '',
         preferredFoot: player.preferredFoot || 'Right',
-        photo: player.photo || '',
       });
+      
+      // Set current photo for preview
+      setCurrentPhoto(player.photo || '');
       
       setTeams(teamsRes.data.data || []);
     } catch (error) {
@@ -120,6 +124,13 @@ export default function EditPlayerPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleImageChange = (file: File | null) => {
+    setPhotoFile(file);
+    if (errors.photo) {
+      setErrors((prev: any) => ({ ...prev, photo: '' }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -128,19 +139,26 @@ export default function EditPlayerPage() {
     try {
       setSaving(true);
       
-      const submitData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dateOfBirth: formData.dateOfBirth,
-        nationality: formData.nationality,
-        position: formData.position,
-        jerseyNumber: parseInt(formData.jerseyNumber),
-        currentTeam: formData.currentTeam,
-        height: formData.height ? parseInt(formData.height) : undefined,
-        weight: formData.weight ? parseInt(formData.weight) : undefined,
-        preferredFoot: formData.preferredFoot,
-        photo: formData.photo || undefined,
-      };
+      // Create FormData for file upload
+      const submitData = new FormData();
+      
+      // Append all form fields
+      submitData.append('firstName', formData.firstName);
+      submitData.append('lastName', formData.lastName);
+      submitData.append('dateOfBirth', formData.dateOfBirth);
+      submitData.append('nationality', formData.nationality);
+      submitData.append('position', formData.position);
+      submitData.append('jerseyNumber', formData.jerseyNumber);
+      submitData.append('currentTeam', formData.currentTeam);
+      submitData.append('preferredFoot', formData.preferredFoot);
+      
+      if (formData.height) submitData.append('height', formData.height);
+      if (formData.weight) submitData.append('weight', formData.weight);
+      
+      // Append photo file if selected
+      if (photoFile) {
+        submitData.append('playerPhoto', photoFile);
+      }
 
       await playersApi.update(playerId, submitData);
       alert('Player updated successfully!');
@@ -373,23 +391,13 @@ export default function EditPlayerPage() {
             {/* Media */}
             <div>
               <h3 className="font-bold text-lg text-text-primary mb-4">Media</h3>
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Photo URL
-                </label>
-                <input
-                  type="url"
-                  name="photo"
-                  value={formData.photo}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-text-tertiary focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none"
-                />
-                {formData.photo && (
-                  <div className="mt-3">
-                    <img src={formData.photo} alt="Player photo preview" className="w-24 h-24 rounded-lg object-cover" />
-                  </div>
-                )}
-              </div>
+              <ImageUpload
+                label="Player Photo"
+                currentImage={currentPhoto}
+                onImageChange={handleImageChange}
+                error={errors.photo}
+                maxSize={5}
+              />
             </div>
 
             {/* Submit Buttons */}

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { teamsApi, seasonsApi, venuesApi, leaguesApi } from '@/lib/api';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function CreateTeamPage() {
   const router = useRouter();
@@ -30,8 +31,6 @@ export default function CreateTeamPage() {
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [teamPhotoFile, setTeamPhotoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>('');
-  const [teamPhotoPreview, setTeamPhotoPreview] = useState<string>('');
   const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
@@ -91,27 +90,17 @@ export default function CreateTeamPage() {
     }
   };
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleLogoChange = (file: File | null) => {
+    setLogoFile(file);
+    if (errors.logo) {
+      setErrors((prev: any) => ({ ...prev, logo: '' }));
     }
   };
 
-  const handleTeamPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setTeamPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTeamPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleTeamPhotoChange = (file: File | null) => {
+    setTeamPhotoFile(file);
+    if (errors.stadium) {
+      setErrors((prev: any) => ({ ...prev, stadium: '' }));
     }
   };
 
@@ -416,44 +405,20 @@ export default function CreateTeamPage() {
             {/* Media */}
             <div>
               <h3 className="font-bold text-lg text-text-primary mb-4">Media</h3>
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Team Logo
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="w-full px-4 py-3 rounded-lg border border-text-tertiary focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none"
+              <div className="space-y-6">
+                <ImageUpload
+                  label="Team Logo"
+                  onImageChange={handleLogoChange}
+                  error={errors.logo}
+                  maxSize={5}
                 />
-                {logoPreview && (
-                  <div className="mt-2">
-                    <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-contain border rounded" />
-                  </div>
-                )}
-                <p className="text-sm text-text-secondary mt-1">
-                  Upload team logo (PNG, JPG, or GIF)
-                </p>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Team Photo (First Eleven)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleTeamPhotoChange}
-                  className="w-full px-4 py-3 rounded-lg border border-text-tertiary focus:border-primary-green focus:ring-2 focus:ring-primary-green/20 outline-none"
+                <ImageUpload
+                  label="Team Photo (First Eleven)"
+                  onImageChange={handleTeamPhotoChange}
+                  error={errors.stadium}
+                  maxSize={10}
                 />
-                {teamPhotoPreview && (
-                  <div className="mt-2">
-                    <img src={teamPhotoPreview} alt="Team photo preview" className="w-full max-w-md h-48 object-cover border rounded" />
-                  </div>
-                )}
-                <p className="text-sm text-text-secondary mt-1">
-                  Upload team photo or squad picture
-                </p>
               </div>
             </div>
 
