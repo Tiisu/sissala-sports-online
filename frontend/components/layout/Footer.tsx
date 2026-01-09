@@ -48,42 +48,30 @@ export default function Footer() {
               The premier football league bringing together the best teams from Sissala and surrounding communities.
             </p>
             <div className="flex items-center gap-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-surface-dark hover:bg-primary-green transition-colors"
+              <span
+                className="p-2 rounded-lg bg-surface-dark cursor-not-allowed opacity-50"
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-surface-dark hover:bg-accent-blue transition-colors"
+              </span>
+              <span
+                className="p-2 rounded-lg bg-surface-dark cursor-not-allowed opacity-50"
                 aria-label="Twitter"
               >
                 <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-surface-dark hover:bg-accent-orange transition-colors"
+              </span>
+              <span
+                className="p-2 rounded-lg bg-surface-dark cursor-not-allowed opacity-50"
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-surface-dark hover:bg-status-error transition-colors"
+              </span>
+              <span
+                className="p-2 rounded-lg bg-surface-dark cursor-not-allowed opacity-50"
                 aria-label="YouTube"
               >
                 <Youtube className="w-5 h-5" />
-              </a>
+              </span>
             </div>
           </div>
 
@@ -93,12 +81,9 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.league.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-text-tertiary hover:text-primary-yellow transition-colors"
-                  >
+                  <span className="text-sm text-text-tertiary cursor-not-allowed opacity-50">
                     {link.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -110,12 +95,9 @@ export default function Footer() {
             <ul className="space-y-2">
               {footerLinks.community.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-text-tertiary hover:text-primary-yellow transition-colors"
-                  >
+                  <span className="text-sm text-text-tertiary cursor-not-allowed opacity-50">
                     {link.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -131,27 +113,24 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2 text-sm text-text-tertiary">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <a href="tel:+233123456789" className="hover:text-primary-yellow">
+                <span className="cursor-not-allowed opacity-50">
                   +233 123 456 789
-                </a>
+                </span>
               </li>
               <li className="flex items-center gap-2 text-sm text-text-tertiary">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <a href="mailto:info@sissalaleague.com" className="hover:text-primary-yellow">
+                <span className="cursor-not-allowed opacity-50">
                   info@sissalaleague.com
-                </a>
+                </span>
               </li>
             </ul>
             <h5 className="font-semibold text-sm mb-2">Support</h5>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-text-tertiary hover:text-primary-yellow transition-colors"
-                  >
+                  <span className="text-sm text-text-tertiary cursor-not-allowed opacity-50">
                     {link.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -168,12 +147,12 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-6">
               <span>Made with ❤️ for Sissala</span>
-              <Link href="/privacy" className="hover:text-primary-yellow">
+              <span className="cursor-not-allowed opacity-50">
                 Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-primary-yellow">
+              </span>
+              <span className="cursor-not-allowed opacity-50">
                 Terms
-              </Link>
+              </span>
             </div>
           </div>
         </div>

@@ -117,8 +117,8 @@ export default function TablesPage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            {/* Table Header */}
-            <div className="bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-6 py-4 overflow-x-auto">
+            {/* Table Header - Desktop: Full table, Mobile: Simple compact */}
+            <div className="hidden md:block bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-6 py-4 overflow-x-auto">
               <div className="grid grid-cols-[40px_minmax(200px,1fr)_60px_60px_60px_60px_60px_60px_80px_120px_80px] gap-4 text-sm font-semibold min-w-max">
                 <div className="text-center">#</div>
                 <div>Team</div>
@@ -131,6 +131,16 @@ export default function TablesPage() {
                 <div className="text-center">GD</div>
                 <div className="text-center">Form</div>
                 <div className="text-center font-bold">PTS</div>
+              </div>
+            </div>
+            
+            {/* Mobile Header - Simple like home page */}
+            <div className="md:hidden bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-4 py-3">
+              <div className="grid grid-cols-12 gap-2 text-xs font-semibold">
+                <div className="col-span-1 text-center">#</div>
+                <div className="col-span-7">Team</div>
+                <div className="col-span-2 text-center">P</div>
+                <div className="col-span-2 text-center">PTS</div>
               </div>
             </div>
 
@@ -153,12 +163,54 @@ export default function TablesPage() {
                   <Link
                     key={team.team?._id || index}
                     href={`/teams/${team.team?._id}`}
-                  className={`grid grid-cols-[40px_minmax(200px,1fr)_60px_60px_60px_60px_60px_60px_80px_120px_80px] gap-4 px-6 py-4 hover:bg-gray-50 transition-colors group min-w-max ${
-                    index === 0 ? 'bg-green-50' : 
-                    index === 1 || index === 2 ? 'bg-blue-50' : 
-                    index >= standings.length - 2 ? 'bg-red-50' : ''
-                  }`}
-                >
+                    className={`block ${
+                      index === 0 ? 'bg-green-50' : 
+                      index === 1 || index === 2 ? 'bg-blue-50' : 
+                      index >= standings.length - 2 ? 'bg-red-50' : ''
+                    }`}
+                  >
+                    {/* Mobile Compact Layout - Like home page */}
+                    <div className="md:hidden px-4 py-3 hover:bg-gray-50 transition-colors">
+                      <div className="grid grid-cols-12 gap-2">
+                        {/* Position */}
+                        <div className="col-span-1 flex items-center justify-center">
+                          <span className={`text-xs font-bold ${
+                            index === 0 ? 'text-green-600' : 
+                            index === 1 || index === 2 ? 'text-blue-600' : 
+                            index >= standings.length - 2 ? 'text-red-600' : 
+                            'text-gray-700'
+                          }`}>
+                            {team.position || index + 1}
+                          </span>
+                        </div>
+
+                        {/* Team */}
+                        <div className="col-span-7 flex items-center gap-2">
+                          {team.team?.logo ? (
+                            <img src={team.team.logo} alt={team.team.name} className="w-5 h-5 object-contain" />
+                          ) : (
+                            <span className="text-lg">🛡️</span>
+                          )}
+                          <span className="font-semibold text-sm text-gray-900 truncate">
+                            {team.team?.name || 'Unknown Team'}
+                          </span>
+                        </div>
+
+                        {/* Played */}
+                        <div className="col-span-2 flex items-center justify-center text-xs text-gray-600">
+                          {team.played || 0}
+                        </div>
+
+                        {/* Points */}
+                        <div className="col-span-2 flex items-center justify-center">
+                          <span className="text-sm font-bold text-gray-900">{team.points || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desktop Table Row - Full */}
+                    <div className="hidden md:grid grid-cols-[40px_minmax(200px,1fr)_60px_60px_60px_60px_60px_60px_80px_120px_80px] gap-4 px-6 py-4 hover:bg-gray-50 transition-colors group min-w-max">
+                  
                   {/* Position with change indicator */}
                   <div className="flex items-center justify-center gap-1">
                     <span className={`text-base font-bold ${
@@ -242,8 +294,9 @@ export default function TablesPage() {
                   <div className="flex items-center justify-center">
                     <span className="text-xl font-bold text-gray-900">{team.points || 0}</span>
                   </div>
-                </Link>
-              ))
+                    </div>
+                  </Link>
+                ))
               )}
             </div>
           </div>

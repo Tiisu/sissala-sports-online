@@ -232,8 +232,8 @@ export default function HomePage() {
 
         <div className="relative container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Featured Story Slider - 2/3 width, no background */}
-            <div className="lg:col-span-2">
+            {/* Main Featured Story Slider - Full width on mobile/tablet, 2/3 on desktop */}
+            <div className="lg:col-span-2 w-full">
               <div className="relative h-[600px]">
                 {/* Slides - Only content changes */}
                 <div className="relative h-full">
@@ -244,32 +244,12 @@ export default function HomePage() {
                         index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
                       }`}
                     >
-                      <div className="h-full relative">
-                        {/* Player Image Overlay (if exists) - positioned on top of background */}
-                        {slide.playerImage && (
-                          <div className="absolute h-[120%] w-auto max-w-[55%] hidden md:block"
-                               style={{
-                                 bottom: slide.id === 2 || slide.id === 3 ? '-180px' : slide.id === 4 ? '-120px' : slide.id === 1 ? '-120px' : '-60px',
-                                 right: slide.id === 1 ? '-100px' : '0'
-                               }}>
-                            <img
-                              src={slide.playerImage}
-                              alt="Featured Player"
-                              className="h-full w-auto object-contain object-bottom"
-                              style={{
-                                transform: slide.id === 2 || slide.id === 3 || slide.id === 4 ? 'scale(1.2)' : 'scale(1.1)',
-                                transformOrigin: 'center bottom',
-                                filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))'
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Content */}
-                        <div className="relative z-20 px-8 md:px-12 h-full flex flex-col justify-end pb-12 max-w-xl space-y-6">
+                      <div className="h-full relative flex flex-col items-center justify-center lg:flex-row lg:items-center lg:justify-start pt-12 lg:pt-0">
+                        {/* Content - Centered and stacked on small/medium, side-by-side on large */}
+                        <div className="relative z-20 px-4 sm:px-8 md:px-12 w-full max-w-2xl lg:max-w-xl flex flex-col justify-center items-center lg:items-start text-center lg:text-left space-y-4 sm:space-y-6 mb-4 lg:mb-0">
                           {/* Badge and Logo */}
                           <div>
-                            <div className="flex items-center gap-3 mb-6">
+                            <div className="flex items-center justify-center lg:justify-start gap-3 mb-6">
                               {/* Team Logo Badge */}
                               <div className="w-12 h-12 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
                                 <span className="text-2xl">⚽</span>
@@ -285,13 +265,13 @@ export default function HomePage() {
                             </div>
 
                             {/* Headline */}
-                            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
+                            <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                               {slide.title}
                             </h1>
                           </div>
 
                           {/* CTAs - Action buttons */}
-                          <div className="flex flex-wrap gap-4">
+                          <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                             <Link href={slide.link} className="btn bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg transition-colors shadow-lg uppercase tracking-wide text-sm inline-flex items-center gap-2">
                               Read More
                               <ArrowRight className="w-5 h-5" />
@@ -301,6 +281,24 @@ export default function HomePage() {
                             </Link>
                           </div>
                         </div>
+
+                        {/* Player Image - Below text on small/medium, on right side on large */}
+                        {slide.playerImage && (
+                          <div className="relative lg:absolute w-full lg:w-auto h-[450px] sm:h-[550px] md:h-[650px] lg:h-[160%] max-w-full lg:max-w-[75%] lg:top-[55%] lg:-translate-y-1/2 mt-2 lg:mt-0"
+                               style={{
+                                 right: slide.id === 1 ? '-50px' : '-20px',
+                                 left: 'auto'
+                               }}>
+                            <img
+                              src={slide.playerImage}
+                              alt="Featured Player"
+                              className="h-full w-auto mx-auto lg:mx-0 object-contain object-center"
+                              style={{
+                                filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.5))'
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -345,8 +343,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Upcoming Fixtures Card - 1/3 width, transparent on background */}
-            <div className="lg:col-span-1">
+            {/* Upcoming Fixtures Card - 1/3 width, transparent on background - Hidden on small/medium screens */}
+            <div className="hidden lg:block lg:col-span-1">
               <div className="bg-[#1a2c4e]/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl p-6 h-[600px] flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/20">

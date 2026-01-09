@@ -152,14 +152,17 @@ export default function MatchesPage() {
         <div className="container mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             {/* Table Header */}
-            <div className="bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-6 py-4">
+            <div className="hidden md:block bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-6 py-4">
               <div className="grid grid-cols-12 gap-4 text-sm font-semibold">
                 <div className="col-span-2">Date & Time</div>
-                <div className="col-span-3">Home Team</div>
-                <div className="col-span-2 text-center">Score</div>
-                <div className="col-span-3">Away Team</div>
+                <div className="col-span-8 text-center">Match</div>
                 <div className="col-span-2">Venue</div>
               </div>
+            </div>
+            
+            {/* Mobile Header */}
+            <div className="md:hidden bg-gradient-to-r from-[#1a2c4e] to-[#2a4a7c] text-white px-4 py-3">
+              <h2 className="text-lg font-bold">Fixtures</h2>
             </div>
 
             {/* Table Body */}
@@ -179,10 +182,78 @@ export default function MatchesPage() {
                 filteredMatches.map((match) => (
                   <div
                     key={match._id}
-                    className={`grid grid-cols-12 gap-4 px-6 py-5 transition-colors ${
+                    className={`transition-colors ${
                       match.status === 'live' || match.status === 'halftime' ? 'bg-red-50' : ''
                     }`}
                   >
+                    {/* Mobile Card Layout */}
+                    <div className="md:hidden px-4 py-4 border-b border-gray-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-semibold text-gray-900">
+                            {format(new Date(match.matchDate), 'MMM dd')}
+                          </span>
+                          <span className="text-gray-500">
+                            {format(new Date(match.matchDate), 'HH:mm')}
+                          </span>
+                        </div>
+                        {(match.status === 'live' || match.status === 'halftime') && (
+                          <span className="text-xs text-red-500 font-bold flex items-center gap-1">
+                            <span className="live-dot"></span>
+                            {match.status === 'halftime' ? 'HT' : 'LIVE'}
+                          </span>
+                        )}
+                        {match.status === 'finished' && (
+                          <span className="text-xs text-green-600 font-semibold">FT</span>
+                        )}
+                      </div>
+                      
+                      {/* Teams and Score */}
+                      <div className="space-y-3">
+                        {/* Home Team */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1">
+                            {match.homeTeam?.logo ? (
+                              <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-6 h-6 object-contain" />
+                            ) : (
+                              <span className="text-xl">🛡️</span>
+                            )}
+                            <span className="font-semibold text-gray-900">
+                              {match.homeTeam?.name}
+                            </span>
+                          </div>
+                          {match.status !== 'scheduled' && (
+                            <span className="text-xl font-bold text-gray-900">{match.score?.home || 0}</span>
+                          )}
+                        </div>
+                        
+                        {/* Away Team */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1">
+                            {match.awayTeam?.logo ? (
+                              <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-6 h-6 object-contain" />
+                            ) : (
+                              <span className="text-xl">⚔️</span>
+                            )}
+                            <span className="font-semibold text-gray-900">
+                              {match.awayTeam?.name}
+                            </span>
+                          </div>
+                          {match.status !== 'scheduled' && (
+                            <span className="text-xl font-bold text-gray-900">{match.score?.away || 0}</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Venue */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-3">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <span>{match.venue?.name || 'TBD'}</span>
+                      </div>
+                    </div>
+
+                    {/* Desktop Grid Layout */}
+                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-5">
                     {/* Date & Time */}
                     <div className="col-span-2 flex flex-col">
                       <span className="text-sm font-semibold text-gray-900">
@@ -243,6 +314,7 @@ export default function MatchesPage() {
                     <div className="col-span-2 flex items-center gap-2 text-sm text-gray-600">
                       <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <span className="truncate">{match.venue?.name || 'TBD'}</span>
+                    </div>
                     </div>
                   </div>
                 ))
