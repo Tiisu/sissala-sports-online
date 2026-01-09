@@ -177,10 +177,9 @@ export default function MatchesPage() {
                 </div>
               ) : (
                 filteredMatches.map((match) => (
-                  <Link
+                  <div
                     key={match._id}
-                    href={`/matches/${match._id}`}
-                    className={`grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50 transition-colors group ${
+                    className={`grid grid-cols-12 gap-4 px-6 py-5 transition-colors ${
                       match.status === 'live' || match.status === 'halftime' ? 'bg-red-50' : ''
                     }`}
                   >
@@ -210,7 +209,7 @@ export default function MatchesPage() {
                       ) : (
                         <span className="text-3xl">🛡️</span>
                       )}
-                      <span className="font-semibold text-gray-900 group-hover:text-red-500 transition-colors">
+                      <span className="font-semibold text-gray-900">
                         {match.homeTeam?.name}
                       </span>
                     </div>
@@ -235,7 +234,7 @@ export default function MatchesPage() {
                       ) : (
                         <span className="text-3xl">⚔️</span>
                       )}
-                      <span className="font-semibold text-gray-900 group-hover:text-red-500 transition-colors">
+                      <span className="font-semibold text-gray-900">
                         {match.awayTeam?.name}
                       </span>
                     </div>
@@ -245,7 +244,7 @@ export default function MatchesPage() {
                       <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <span className="truncate">{match.venue?.name || 'TBD'}</span>
                     </div>
-                  </Link>
+                  </div>
                 ))
               )}
             </div>

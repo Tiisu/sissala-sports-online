@@ -15,11 +15,12 @@ export default function NewsPage() {
 
   const categories = [
     { value: 'all', label: 'All News' },
-    { value: 'match-report', label: 'Match Reports' },
-    { value: 'team-news', label: 'Team News' },
+    { value: 'match_report', label: 'Match Reports' },
     { value: 'transfer', label: 'Transfers' },
+    { value: 'injury', label: 'Injuries' },
     { value: 'announcement', label: 'Announcements' },
     { value: 'interview', label: 'Interviews' },
+    { value: 'general', label: 'General' },
   ];
 
   // Fetch news from API
@@ -35,7 +36,9 @@ export default function NewsPage() {
           response = await newsApi.getByCategory(selectedCategory);
         }
         
-        setNewsArticles(response.data.data || []);
+        // Backend returns different structures: getAll returns paginated data, getByCategory returns {news: [...]}
+        const data = response.data.data?.news || response.data.data;
+        setNewsArticles(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching news:', error);
         setNewsArticles([]);
@@ -48,14 +51,15 @@ export default function NewsPage() {
   }, [selectedCategory]);
 
 
-  const filteredNews = newsArticles.filter((article) => {
-    const matchesSearch = article.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  // When we fetch by category from the API, the results are already filtered
+  // We only need to apply search filter
+  const filteredNews = Array.isArray(newsArticles) ? newsArticles.filter((article) => {
+    const matchesSearch = searchQuery === '' || 
+                         article.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.content?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           article.category?.toLowerCase().replace(' ', '-') === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    return matchesSearch;
+  }) : [];
 
   const featuredArticle = filteredNews.find(article => article.featured);
   const regularArticles = filteredNews.filter(article => !article.featured);

@@ -364,10 +364,9 @@ export default function HomePage() {
                     <div className="text-white/60 text-center py-8">No upcoming fixtures</div>
                   ) : (
                     upcomingFixtures.slice(0, 2).map((fixture) => (
-                      <Link
+                      <div
                         key={fixture._id}
-                        href={`/matches/${fixture._id}`}
-                        className="block bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors border border-white/10"
+                        className="block bg-white/5 rounded-xl p-4 border border-white/10"
                       >
                         {/* Competition Badge */}
                         <div className="text-xs text-red-500 font-semibold mb-3 uppercase tracking-wide">
@@ -410,7 +409,7 @@ export default function HomePage() {
                           <span>📍</span>
                           <span>{fixture.venue?.name || 'TBD'}</span>
                         </div>
-                      </Link>
+                      </div>
                     ))
                   )}
                 </div>
