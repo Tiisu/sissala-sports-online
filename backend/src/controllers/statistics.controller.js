@@ -4,49 +4,64 @@
 
 const { asyncHandler } = require('../middleware/error.middleware');
 const { sendSuccess } = require('../utils/response.util');
+const { cache, cacheKeys } = require('../utils/cache.util');
 const Match = require('../models/Match.model');
 const Team = require('../models/Team.model');
 const Player = require('../models/Player.model');
 
 exports.getLeagueTable = asyncHandler(async (req, res, next) => {
   const { leagueId } = req.params;
+  const { seasonId } = req.query;
+  
+  // Generate cache key
+  const cacheKey = cacheKeys.leagueTable(leagueId, seasonId);
+  
+  // Try to get from cache
+  const cachedData = await cache.get(cacheKey);
+  if (cachedData) {
+    return sendSuccess(res, 200, { table: cachedData, fromCache: true }, 'League table retrieved from cache');
+  }
   
   // Get all finished matches for the league
+  const matchQuery = { league: leagueId, status: 'finished' };
+  if (seasonId) matchQuery.season = seasonId;
+  
+  const matches = await Match.find(matchQuery).populate('homeTeam awayTeam');
+  
+  // Calculate standings
+  const standings = await calculateStandings(matches);
+  
+  // Cache for 5 minutes (300 seconds)
+  await cache.set(cacheKey, standings, 300);
+  
+  sendSuccess(res, 200, { table: standings, fromCache: false }, 'League table retrieved successfully');
+});
+
+exports.getSeasonTable = asyncHandler(async (req, res, next) => {
+  const { seasonId } = req.params;
+  
+  // Generate cache key
+  const cacheKey = cacheKeys.seasonStandings(seasonId);
+  
+  // Try to get from cache
+  const cachedData = await cache.get(cacheKey);
+  if (cachedData) {
+    return sendSuccess(res, 200, { table: cachedData, fromCache: true }, 'Season table retrieved from cache');
+  }
+  
+  // Get all finished matches for the season
   const matches = await Match.find({
-    league: leagueId,
+    season: seasonId,
     status: 'finished'
   }).populate('homeTeam awayTeam');
   
   // Calculate standings
   const standings = await calculateStandings(matches);
   
-  sendSuccess(res, 200, { table: standings }, 'League table retrieved successfully');
-});
-
-exports.getSeasonTable = asyncHandler(async (req, res, next) => {
-  const { seasonId } = req.params;
+  // Cache for 5 minutes (300 seconds)
+  await cache.set(cacheKey, standings, 300);
   
-  console.log('Getting season table for:', seasonId);
-  
-  try {
-    // Get all finished matches for the season
-    const matches = await Match.find({
-      season: seasonId,
-      status: 'finished'
-    }).populate('homeTeam awayTeam');
-    
-    console.log('Found matches:', matches.length);
-    
-    // Calculate standings
-    const standings = await calculateStandings(matches);
-    
-    console.log('Calculated standings:', standings.length);
-    
-    sendSuccess(res, 200, { table: standings }, 'Season table retrieved successfully');
-  } catch (error) {
-    console.error('Error in getSeasonTable:', error);
-    throw error;
-  }
+  sendSuccess(res, 200, { table: standings, fromCache: false }, 'Season table retrieved successfully');
 });
 
 // Helper function to calculate standings from matches
@@ -165,6 +180,15 @@ async function calculateStandings(matches) {
 exports.getTopScorers = asyncHandler(async (req, res, next) => {
   const { seasonId } = req.params;
   
+  // Generate cache key
+  const cacheKey = cacheKeys.topScorers(seasonId);
+  
+  // Try to get from cache
+  const cachedData = await cache.get(cacheKey);
+  if (cachedData) {
+    return sendSuccess(res, 200, { data: cachedData, fromCache: true }, 'Top scorers retrieved from cache');
+  }
+  
   // Get all finished matches for the season with events
   const matches = await Match.find({
     season: seasonId,
@@ -201,7 +225,10 @@ exports.getTopScorers = asyncHandler(async (req, res, next) => {
     .sort((a, b) => b.goals - a.goals)
     .slice(0, 20); // Top 20 scorers
   
-  sendSuccess(res, 200, topScorers, 'Top scorers retrieved successfully');
+  // Cache for 10 minutes (600 seconds)
+  await cache.set(cacheKey, topScorers, 600);
+  
+  sendSuccess(res, 200, { data: topScorers, fromCache: false }, 'Top scorers retrieved successfully');
 });
 
 exports.getTopAssists = asyncHandler(async (req, res, next) => {

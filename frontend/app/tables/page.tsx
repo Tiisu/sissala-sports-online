@@ -45,8 +45,6 @@ export default function TablesPage() {
         
         // Fetch standings
         const standingsResponse = await statisticsApi.getSeasonTable(selectedSeason);
-        console.log('Standings API Response:', standingsResponse.data);
-        console.log('Response keys:', Object.keys(standingsResponse.data));
         
         // Handle different response structures
         const standingsData = standingsResponse.data.data?.standings || 
@@ -55,9 +53,6 @@ export default function TablesPage() {
                              standingsResponse.data.table || 
                              standingsResponse.data.data || 
                              [];
-        
-        console.log('Extracted standings:', standingsData);
-        console.log('Is array?', Array.isArray(standingsData));
         
         setStandings(Array.isArray(standingsData) ? standingsData : []);
         
